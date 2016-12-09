@@ -10,6 +10,8 @@ import cucumber.runtime.snippets.SnippetGenerator;
 import gherkin.formatter.model.Step;
 import gw.lang.Gosu;
 import gw.lang.function.AbstractBlock;
+import gw.lang.reflect.ReflectUtil;
+import gw.lang.reflect.gs.IProgramInstance;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -29,16 +31,24 @@ public class GosuBackend implements Backend {
     @Override
     public void loadGlue(Glue glue, List<String> gluePaths) {
         this.glue = glue;
-        GlueSource source = new GlueSource();
+//        GlueSource source = new GlueSource();
 
         for (String gluePath : gluePaths) {
             for (Resource glueScript : resourceLoader.resources(gluePath, ".gsp")) {
-                source.addGlueScript(glueScript);
+                this.runGlueScript(glueScript);
             }
         }
+    }
 
-        Gosu gosu = new Gosu();
-        gosu.start(source.toArgInfo());
+    private void runGlueScript(Resource glueScript) {
+        Class clazz = ReflectUtil.getClass(glueScript.getClassName(".gsp")).getBackingClass();
+        try {
+            ((IProgramInstance)(clazz.newInstance())).evaluate(null);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
