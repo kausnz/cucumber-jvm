@@ -32,18 +32,20 @@ public class GosuBackend implements Backend {
     public void loadGlue(Glue glue, List<String> gluePaths) {
         this.glue = glue;
 //        GlueSource source = new GlueSource();
-
-        for (String gluePath : gluePaths) {
-            for (Resource glueScript : resourceLoader.resources(gluePath, ".gsp")) {
-                this.runGlueScript(glueScript);
-            }
-        }
+//        for (String gluePath : gluePaths) {
+//            for (Resource glueScript : resourceLoader.resources(gluePath, ".gsp")) {
+//                this.runGlueScript(glueScript);
+//            }
+//        }
+        this.runGlueScript(null);
     }
 
     private void runGlueScript(Resource glueScript) {
-        Class clazz = ReflectUtil.getClass(glueScript.getClassName(".gsp")).getBackingClass();
+//        Class clazz = ReflectUtil.getClass(glueScript.getClassName(".gsp")).getBackingClass();
+        Gosu.init();
+        Class clazz = ReflectUtil.getClass("cucumber.features.MyStepDefinitions").getBackingClass();
         try {
-            ((IProgramInstance)(clazz.newInstance())).evaluate(null);
+            ((IProgramInstance) (clazz.newInstance())).evaluate(null);
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -68,7 +70,8 @@ public class GosuBackend implements Backend {
 
     @Override
     public String getSnippet(Step step, FunctionNameGenerator functionNameGenerator) {
-        return snippetGenerator.getSnippet(step, null);    }
+        return snippetGenerator.getSnippet(step, null);
+    }
 
     public void addStepDefinition(String regexp, Object body) {
         AbstractBlock block = (AbstractBlock) body;
